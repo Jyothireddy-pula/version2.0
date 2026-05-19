@@ -1,3 +1,4 @@
+import asyncio
 import random
 import time
 import httpx
@@ -34,7 +35,7 @@ class BaseScraper:
             except Exception as e:
                 if attempt == settings.scraper_max_retries - 1:
                     raise e
-                time.sleep(2 ** attempt)
+                await asyncio.sleep(2 ** attempt)
 
     def soup(self, html: str):
         return BeautifulSoup(html, "html.parser")

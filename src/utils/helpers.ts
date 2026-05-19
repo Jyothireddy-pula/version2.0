@@ -301,3 +301,16 @@ export function fuzzyMatch(str1: string, str2: string): number {
   
   return matches / maxLen;
 }
+
+export function formatTimeOnly(dateString: string): string {
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return '';
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // The hour '0' should be '12'
+  const strHours = String(hours).padStart(2, '0');
+  return `${strHours}:${minutes}:${seconds} ${ampm}`;
+}

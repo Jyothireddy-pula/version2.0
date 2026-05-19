@@ -102,17 +102,46 @@ const defaultFilters: FilterState = {
 
 function applyFilters(opportunities: Opportunity[], filters: FilterState): Opportunity[] {
   let filtered = [...opportunities];
+  const searchScores = new Map<string, number>();
 
   if (filters.search) {
-    const q = filters.search.toLowerCase();
-    filtered = filtered.filter(opp =>
-      opp.title.toLowerCase().includes(q) ||
-      opp.description.toLowerCase().includes(q) ||
-      opp.organizer.toLowerCase().includes(q) ||
-      opp.sectors.some(s => s.toLowerCase().includes(q)) ||
-      opp.tags.some(t => t.toLowerCase().includes(q)) ||
-      opp.location.toLowerCase().includes(q)
-    );
+    const q = filters.search.toLowerCase().trim();
+    const queryWords = q.split(/\s+/).filter(Boolean);
+
+    filtered = filtered.filter(opp => {
+      let score = 0;
+      const titleLower = opp.title.toLowerCase();
+      const descLower = opp.description.toLowerCase();
+      const orgLower = opp.organizer.toLowerCase();
+      const locLower = opp.location.toLowerCase();
+
+      // Exact phrase match boosts
+      if (titleLower === q) score += 500;
+      else if (titleLower.includes(q)) score += 200;
+
+      if (descLower.includes(q)) score += 50;
+      if (orgLower.includes(q)) score += 100;
+      if (locLower.includes(q)) score += 80;
+
+      // Tag & Sector exact phrase match boosts
+      if (opp.sectors.some(s => s.toLowerCase() === q)) score += 150;
+      if (opp.tags.some(t => t.toLowerCase() === q)) score += 150;
+
+      // Individual keyword matches
+      queryWords.forEach(word => {
+        if (titleLower.includes(word)) score += 30;
+        if (descLower.includes(word)) score += 5;
+        if (orgLower.includes(word)) score += 15;
+        if (opp.sectors.some(s => s.toLowerCase().includes(word))) score += 25;
+        if (opp.tags.some(t => t.toLowerCase().includes(word))) score += 20;
+      });
+
+      if (score > 0) {
+        searchScores.set(opp.id, score);
+        return true;
+      }
+      return false;
+    });
   }
 
   if (filters.types.length > 0) {
@@ -147,6 +176,15 @@ function applyFilters(opportunities: Opportunity[], filters: FilterState): Oppor
   }
 
   filtered.sort((a, b) => {
+    // Prioritize search scores if search query is active
+    if (filters.search) {
+      const scoreA = searchScores.get(a.id) || 0;
+      const scoreB = searchScores.get(b.id) || 0;
+      if (scoreA !== scoreB) {
+        return scoreB - scoreA; // Descending by relevance score
+      }
+    }
+
     let comparison = 0;
     switch (filters.sortBy) {
       case 'deadline':

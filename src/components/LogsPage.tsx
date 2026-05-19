@@ -1,5 +1,6 @@
 import { useStore } from '../store/useStore';
 import { ScrollText, CheckCircle2, AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import { formatTimeOnly } from '../utils/helpers';
 
 function LevelIcon({ level }: { level: string }) {
   switch (level) {
@@ -52,7 +53,7 @@ export default function LogsPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-muted">
-                    {new Date(log.timestamp).toLocaleTimeString('en-IN')}
+                    {formatTimeOnly(log.timestamp)}
                   </span>
                   <span className="text-[10px] font-bold text-ocean">[{log.source}]</span>
                 </div>

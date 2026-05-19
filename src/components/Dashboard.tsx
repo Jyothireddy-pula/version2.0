@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { getDeadlineUrgency, getTypeEmoji, getUrgencyColor, getCompanyLogo } from '../utils/helpers';
+import { getDeadlineUrgency, getTypeEmoji, getUrgencyColor, getCompanyLogo, formatTimeOnly } from '../utils/helpers';
 import {
   TrendingUp,
   Zap,
@@ -41,6 +41,23 @@ export default function Dashboard() {
 
   const [tickerOffset, setTickerOffset] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isScraping, setIsScraping] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const handleForceScrape = async () => {
+    if (isScraping) return;
+    setIsScraping(true);
+    setShowToast(true);
+    try {
+      await triggerLiveScrapingCycle();
+    } catch (e) {
+      console.error(e);
+    }
+    // Artificial 1200ms delay to let the user see the gorgeous spinning indicator
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    setIsScraping(false);
+    setTimeout(() => setShowToast(false), 3000);
+  };
 
   // Update live clock every second
   useEffect(() => {
@@ -63,7 +80,7 @@ export default function Dashboard() {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const newThisWeek = opportunities.filter(o => new Date(o.createdAt) >= weekAgo).length;
-    const avgScore = Math.round(opportunities.reduce((sum, o) => sum + o.aiScore, 0) / total);
+    const avgScore = total > 0 ? Math.round(opportunities.reduce((sum, o) => sum + o.aiScore, 0) / total) : 0;
     const urgent = opportunities.filter(o => o.urgency === 'Critical' || o.urgency === 'High').length;
     const totalFunding = opportunities.filter(o => o.fundingAmount).length;
     const sources = [...new Set(opportunities.map(o => o.source))].length;
@@ -148,12 +165,15 @@ export default function Dashboard() {
           </button>
 
           <button
-            onClick={triggerLiveScrapingCycle}
-            className="flex items-center gap-1.5 px-4 py-2 bg-black text-white rounded-md text-xs font-semibold hover:bg-primary-hover transition-all card-shadow"
+            onClick={handleForceScrape}
+            disabled={isScraping}
+            className={`flex items-center gap-1.5 px-4 py-2 bg-black text-white rounded-md text-xs font-semibold hover:bg-primary-hover transition-all card-shadow ${
+              isScraping ? 'opacity-80 cursor-wait' : ''
+            }`}
             title="Force immediate scraping of social media and portal feeds"
           >
-            <RefreshCw size={14} className="animate-spin-hover" />
-            <span>Force Scrape Now</span>
+            <RefreshCw size={14} className={isScraping ? 'animate-spin' : 'animate-spin-hover'} />
+            <span>{isScraping ? 'Scraping Feeds...' : 'Force Scrape Now'}</span>
           </button>
 
           <div className="flex items-center gap-2 pl-2 border-l border-border">
@@ -223,7 +243,7 @@ export default function Dashboard() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 text-[11px]">
               <span className="font-semibold uppercase tracking-wider text-ink">[{latestLiveLog.source}]</span>
-              <span className="text-muted">{new Date(latestLiveLog.timestamp).toLocaleTimeString('en-IN')}</span>
+              <span className="text-muted">{formatTimeOnly(latestLiveLog.timestamp)}</span>
             </div>
             <p className="text-xs font-medium text-ink truncate mt-0.5">{latestLiveLog.message}</p>
           </div>
@@ -540,6 +560,17 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Dynamic Scraper Toast Alert */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 z-50 p-4 bg-black border border-border/80 text-white rounded-xl shadow-2xl flex items-center gap-3 animate-fade-in">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="text-xs font-semibold">
+            <p className="text-white">✦ System Ingestion Active</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{isScraping ? 'Triggering scraper cycles...' : 'Database populated successfully!'}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

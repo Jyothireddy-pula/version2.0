@@ -34,6 +34,10 @@ function App() {
     return () => clearInterval(interval);
   }, [initStore]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', uiTheme);
+  }, [uiTheme]);
+
   const [email, setEmail] = useState('');
   const [category, setCategory] = useState('AI Startup Grants');
   const [subscribedSuccess, setSubscribedSuccess] = useState(false);

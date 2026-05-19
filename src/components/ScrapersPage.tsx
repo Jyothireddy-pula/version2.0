@@ -30,7 +30,34 @@ function getStatusBg(status: string) {
     default: return 'bg-warm text-muted border-ghost';
   }
 }
-
+function getScraperLogo(source: string) {
+  const normalized = source.toLowerCase();
+  if (normalized.includes('startup india')) {
+    return { bg: 'bg-ocean/10 text-ocean border-ocean/30', emoji: '🚀', initials: 'SI' };
+  }
+  if (normalized.includes('nasscom')) {
+    return { bg: 'bg-plum/10 text-plum border-plum/30', emoji: '💻', initials: 'NS' };
+  }
+  if (normalized.includes('dpiit')) {
+    return { bg: 'bg-moss/10 text-moss border-moss/30', emoji: '🛡️', initials: 'DP' };
+  }
+  if (normalized.includes('invest india')) {
+    return { bg: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30', emoji: '📈', initials: 'II' };
+  }
+  if (normalized.includes('meity')) {
+    return { bg: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/30', emoji: '🧠', initials: 'MS' };
+  }
+  if (normalized.includes('t-hub')) {
+    return { bg: 'bg-danger/10 text-danger border-danger/30', emoji: '🔥', initials: 'TH' };
+  }
+  if (normalized.includes('iit')) {
+    return { bg: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30', emoji: '🎓', initials: 'IIT' };
+  }
+  if (normalized.includes('karnataka')) {
+    return { bg: 'bg-amber/10 text-amber border-amber/30', emoji: '🌾', initials: 'KA' };
+  }
+  return { bg: 'bg-surface border-border', emoji: '🤖', initials: 'SC' };
+}
 export default function ScrapersPage() {
   const { scrapers, runScraper, opportunities, refreshData } = useStore();
   const [dbMetrics, setDbMetrics] = useState<any>(null);
@@ -95,73 +122,88 @@ export default function ScrapersPage() {
 
       {/* Scraper Cards */}
       <div className="space-y-4">
-        {scrapers.map(scraper => (
-          <div
-            key={scraper.source}
-            className={`bg-surface rounded-xl border border-border p-6 card-shadow transition-all ${scraper.status === 'error' ? 'border-danger/50 bg-danger/5' : ''}`}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-paper flex items-center justify-center border border-border card-shadow flex-shrink-0">
-                  <Radio size={24} className="text-ocean" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-ink tracking-tight">{scraper.source}</h3>
-                  <p className="text-xs text-muted font-medium mt-0.5">{scraper.itemsScraped} items · Strategy: {scraper.strategy}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md border ${getStatusBg(scraper.status)}`}>
-                  <StatusIcon status={scraper.status} />
-                  {scraper.status.charAt(0).toUpperCase() + scraper.status.slice(1)}
-                </span>
-                <button
-                  onClick={() => runScraper(scraper.source)}
-                  className="p-2 bg-paper border border-border rounded-md hover:bg-surface-hover text-ink transition-colors card-shadow"
-                  title="Force Scrape Endpoint"
-                >
-                  <RefreshCw size={14} className="animate-spin-hover" />
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-3 bg-paper rounded-lg border border-border">
-                <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Items</p>
-                <p className="text-lg font-bold text-ink">{scraper.itemsScraped}</p>
-              </div>
-              <div className="p-3 bg-paper rounded-lg border border-border">
-                <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Success</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-lg font-bold text-ink">{scraper.successRate}%</p>
-                  <div className="flex-1 h-2 bg-surface-hover rounded-full overflow-hidden border border-border/50">
-                    <div className={`h-full rounded-full ${scraper.successRate >= 95 ? 'bg-success' : scraper.successRate >= 90 ? 'bg-warning' : 'bg-danger'}`} style={{ width: `${scraper.successRate}%` }} />
+        {scrapers.map(scraper => {
+          const logo = getScraperLogo(scraper.source);
+          return (
+            <div
+              key={scraper.source}
+              className={`bg-surface rounded-xl border border-border p-6 card-shadow transition-all ${scraper.status === 'error' ? 'border-danger/30 bg-danger/5' : ''}`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-lg flex flex-col items-center justify-center border font-bold card-shadow flex-shrink-0 leading-none ${logo.bg}`}>
+                    <span className="text-[11px] tracking-tight opacity-75 font-mono uppercase">{logo.initials}</span>
+                    <span className="text-sm mt-0.5">{logo.emoji}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-ink tracking-tight">{scraper.source}</h3>
+                    <p className="text-xs text-muted font-medium mt-0.5">{scraper.itemsScraped} items · Strategy: {scraper.strategy}</p>
                   </div>
                 </div>
+                <div className="flex items-center gap-3">
+                  <span className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md border ${getStatusBg(scraper.status)}`}>
+                    <StatusIcon status={scraper.status} />
+                    {scraper.status.charAt(0).toUpperCase() + scraper.status.slice(1)}
+                  </span>
+                  <button
+                    onClick={() => runScraper(scraper.source)}
+                    className="p-2 bg-paper border border-border rounded-md hover:bg-surface-hover text-ink transition-colors card-shadow"
+                    title="Force Scrape Endpoint"
+                  >
+                    <RefreshCw size={14} className="animate-spin-hover" />
+                  </button>
+                </div>
               </div>
-              <div className="p-3 bg-paper rounded-lg border border-border">
-                <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Response</p>
-                <p className="text-lg font-bold text-ink">{scraper.avgResponseTime}s</p>
-              </div>
-              <div className="p-3 bg-paper rounded-lg border border-border">
-                <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Next</p>
-                <p className="text-sm font-bold text-ink font-mono">
-                  {new Date(scraper.nextRun).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
 
-            {/* Error log */}
-            {scraper.errorLog && scraper.errorLog.length > 0 && (
-              <div className="mt-4 p-3 bg-danger/10 border border-danger/20 rounded-lg space-y-1">
-                {scraper.errorLog.map((err, i) => (
-                  <p key={i} className="text-xs text-danger font-medium flex items-center gap-1.5">
-                    <AlertCircle size={14} />
-                    <span>{err}</span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-3 bg-paper rounded-lg border border-border">
+                  <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Items</p>
+                  <p className="text-lg font-bold text-ink">{scraper.itemsScraped}</p>
+                </div>
+                <div className="p-3 bg-paper rounded-lg border border-border">
+                  <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Success</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-bold text-ink">{scraper.successRate}%</p>
+                    <div className="flex-1 h-2 bg-surface-hover rounded-full overflow-hidden border border-border/50">
+                      <div className={`h-full rounded-full ${scraper.successRate >= 95 ? 'bg-success' : scraper.successRate >= 90 ? 'bg-warning' : 'bg-danger'}`} style={{ width: `${scraper.successRate}%` }} />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 bg-paper rounded-lg border border-border">
+                  <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Response</p>
+                  <p className="text-lg font-bold text-ink">{scraper.avgResponseTime}s</p>
+                </div>
+                <div className="p-3 bg-paper rounded-lg border border-border">
+                  <p className="text-[10px] text-muted font-semibold uppercase tracking-wider mb-1">Next</p>
+                  <p className="text-sm font-bold text-ink font-mono">
+                    {new Date(scraper.nextRun).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                   </p>
-                ))}
+                </div>
               </div>
-            )}
+
+              {/* Error log with Interactive Resolution */}
+              {scraper.errorLog && scraper.errorLog.length > 0 && (
+                <div className="mt-4 p-4 bg-danger/5 border border-danger/20 rounded-lg space-y-3.5">
+                  <div className="space-y-1.5">
+                    {scraper.errorLog.map((err, i) => (
+                      <p key={i} className="text-xs text-danger font-medium flex items-center gap-2">
+                        <AlertCircle size={14} className="flex-shrink-0" />
+                        <span>{err}</span>
+                      </p>
+                    ))}
+                  </div>
+                  <div className="pt-2.5 border-t border-danger/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <span className="text-[10px] text-danger font-bold uppercase tracking-wider">Status: Blocked by Anti-Scraping / Timeout</span>
+                    <button
+                      onClick={() => runScraper(scraper.source)}
+                      className="px-3 py-1.5 bg-danger text-white rounded text-[10px] font-bold hover:bg-danger-light transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] card-shadow"
+                    >
+                      <RefreshCw size={10} className="animate-spin-hover" />
+                      <span>Auto-Resolve & Bypass Limit</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
             {/* Progress bar */}
             <div className="mt-6 h-1.5 bg-surface-hover rounded-full overflow-hidden border border-border/50">
@@ -175,8 +217,9 @@ export default function ScrapersPage() {
               />
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
+    </div>
 
       {/* Database Engine & Storage Metrics */}
       <div className="bg-surface rounded-xl border border-border p-6 card-shadow space-y-4">
@@ -202,6 +245,7 @@ export default function ScrapersPage() {
             >
               <option value="SQLite (Relational)">SQLite (Relational)</option>
               <option value="MongoDB (NoSQL Document)">MongoDB (NoSQL Document)</option>
+              <option value="PostgreSQL (Enterprise Pipeline)">PostgreSQL (Enterprise Pipeline)</option>
             </select>
           </div>
         </div>
@@ -232,6 +276,8 @@ export default function ScrapersPage() {
           <p>
             {dbMetrics?.engine === 'MongoDB (NoSQL Document)' 
               ? 'Collections: opportunities (B-tree indexed on type, source, deadline), scrape_logs, alerts, subscriptions. Supports dynamic BSON document models with flexible schema enrichment.'
+              : dbMetrics?.engine === 'PostgreSQL (Enterprise Pipeline)'
+              ? 'Schema: opportunities (PK uuid, indexes: title gin_trgm, source, created_at), logs, alerts. Utilizes parallel query workers, connection pooling, ACID compliance, and robust relational constraint integrity for enterprise intelligence.'
               : 'Tables: opportunities (PK id, indexes: type, source, deadline, created_at), scrape_logs, alerts, subscriptions. Enforces strict relational schemas with primary keys and transaction simulation.'
             }
           </p>

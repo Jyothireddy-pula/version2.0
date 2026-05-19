@@ -99,7 +99,7 @@ const defaultFilters: FilterState = {
   remoteTypes: [],
   urgency: [],
   deadlineRange: 'all',
-  sortBy: 'aiScore',
+  sortBy: 'createdAt',
   sortOrder: 'desc',
 };
 
@@ -531,17 +531,17 @@ export const useStore = create<AppState>((set, get) => ({
     if (isApiConfigured()) {
       try {
         set(state => ({
-          scrapers: state.scrapers.map(s => s.source === source ? { ...s, status: 'running' as const } : s),
+          scrapers: state.scrapers.map(s => s.source === source ? { ...s, status: 'running' as const, errorLog: [] } : s),
           logs: [{ id: Date.now().toString(), timestamp: now.toISOString(), source, message: `[BACKEND SCRAPE] Triggered real scraper API for ${source}`, level: 'info' }, ...state.logs],
         }));
-        await runScrapersApi(get().filters.search || undefined);
+        await runScrapersApi(get().filters.search || undefined, undefined, true);
         const apiOpps = await fetchOpportunitiesFromApi();
         const apiLogs = await fetchLogsFromApi();
         set(state => ({
           opportunities: apiOpps,
           filteredOpportunities: applyFilters(apiOpps, state.filters),
           logs: apiLogs.length ? apiLogs : state.logs,
-          scrapers: state.scrapers.map(s => s.source === source ? { ...s, status: 'completed' as const, lastRun: new Date().toISOString(), nextRun: new Date(Date.now() + 60 * 60 * 1000).toISOString() } : s),
+          scrapers: state.scrapers.map(s => s.source === source ? { ...s, status: 'completed' as const, errorLog: [], lastRun: new Date().toISOString(), nextRun: new Date(Date.now() + 60 * 60 * 1000).toISOString() } : s),
           lastUpdate: new Date().toISOString(),
         }));
         return;
@@ -560,7 +560,7 @@ export const useStore = create<AppState>((set, get) => ({
     await db.insertLog(startLog);
 
     set(state => ({
-      scrapers: state.scrapers.map(s => s.source === source ? { ...s, status: 'running' as const } : s),
+      scrapers: state.scrapers.map(s => s.source === source ? { ...s, status: 'running' as const, errorLog: [] } : s),
       logs: [startLog, ...state.logs],
     }));
     
@@ -618,6 +618,7 @@ export const useStore = create<AppState>((set, get) => ({
         scrapers: state.scrapers.map(s => s.source === source ? {
           ...s,
           status: 'completed' as const,
+          errorLog: [],
           itemsScraped: s.itemsScraped + (dbRes.isDuplicate ? 0 : 1),
           lastRun: new Date().toISOString(),
           nextRun: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
@@ -689,7 +690,7 @@ export const useStore = create<AppState>((set, get) => ({
         set(prev => ({
           logs: [{ id: Date.now().toString(), timestamp: now.toISOString(), source: 'System Scheduler', message: `[BACKEND INGESTION] Triggering automated scraper cycle on Python backend...`, level: 'info' as const }, ...prev.logs]
         }));
-        await runScrapersApi(state.filters.search || undefined);
+        await runScrapersApi(state.filters.search || undefined, undefined, true);
         const apiOpps = await fetchOpportunitiesFromApi();
         const apiLogs = await fetchLogsFromApi();
         if (apiOpps.length > 0) {

@@ -44,11 +44,12 @@ export async function fetchOpportunitiesFromApi(params: Record<string, string> =
   return rows.map(mapOpportunity);
 }
 
-export async function runScrapersApi(keyword?: string, region?: string) {
+export async function runScrapersApi(keyword?: string, region?: string, sync: boolean = false) {
   if (!API_BASE) return null;
   const query = new URLSearchParams();
   if (keyword) query.set('keyword', keyword);
   if (region) query.set('region', region);
+  if (sync) query.set('sync', 'true');
   const res = await fetch(`${API_BASE}/scrapers/run${query.toString() ? `?${query.toString()}` : ''}`, { method: 'POST' });
   if (!res.ok) throw new Error('Failed to run backend scrapers');
   return res.json();

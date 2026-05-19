@@ -37,12 +37,18 @@ export default function Dashboard() {
     adminStats,
     simulateAdminFailure,
     simulateAdminSuccess,
+    activeAiSuggestion,
+    setActiveAiSuggestion,
   } = useStore();
 
   const [tickerOffset, setTickerOffset] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isScraping, setIsScraping] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  // Custom Local Interactive States for View Variations
+  const [dpiitSteps, setDpiitSteps] = useState([true, false, false, false]);
+  const [gpuAllocation, setGpuAllocation] = useState(65);
 
   const handleForceScrape = async () => {
     if (isScraping) return;
@@ -87,7 +93,9 @@ export default function Dashboard() {
     return { total, newThisWeek, avgScore, urgent, totalFunding, sources };
   }, [opportunities]);
 
-  const featuredOpps = opportunities.filter(o => o.featured).slice(0, 5);
+  const recentOpps = [...opportunities]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
   const urgentOpps = opportunities
     .filter(o => getDeadlineUrgency(o.deadline) === 'urgent' || getDeadlineUrgency(o.deadline) === 'soon')
     .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
@@ -256,6 +264,224 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Dynamic View Variations */}
+      {activeAiSuggestion === 'AI Startup Grants' && (
+        <div className="bg-gradient-to-br from-moss/10 to-ocean/5 p-6 rounded-xl border-2 border-moss/30 shadow-md space-y-4 animate-scaleIn">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🤖</span>
+              <div>
+                <h3 className="text-base font-bold text-ink tracking-tight">AI & DeepTech Scaleup Hub</h3>
+                <p className="text-[10px] text-muted font-medium uppercase tracking-wider">Active Workspace Heuristics</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setActiveAiSuggestion(null)}
+              className="text-xs text-muted hover:text-ink font-semibold"
+            >
+              ✕ Clear View
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Compute allocation */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-2">
+              <p className="text-[10px] text-muted font-bold uppercase tracking-wider">GPU Credits & Compute Allocations</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-ink">AWS Bedrock Credits</span>
+                <span className="text-xs font-bold text-moss">$15,000 / $25,000</span>
+              </div>
+              <div className="h-2 bg-surface-hover rounded-full overflow-hidden border border-border/50">
+                <div className="h-full bg-moss rounded-full" style={{ width: `${gpuAllocation}%` }} />
+              </div>
+              <button 
+                onClick={() => setGpuAllocation(prev => Math.min(100, prev + 5))}
+                className="text-[10px] text-ocean font-bold hover:underline"
+              >
+                Claim Additional Credits ↗
+              </button>
+            </div>
+
+            {/* Model validation status */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-2.5">
+              <p className="text-[10px] text-muted font-bold uppercase tracking-wider">Model Validation Checks</p>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between font-semibold">
+                  <span className="text-muted">NLP Pipeline Compatibility:</span>
+                  <span className="text-moss">100% Passed</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span className="text-muted">Deduplication Heuristic:</span>
+                  <span className="text-moss">Active (Trigram)</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span className="text-muted">Vector Match Threshold:</span>
+                  <span className="text-ink">0.82 Cosine</span>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Grants Direct Callouts */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-2.5">
+              <p className="text-[10px] text-muted font-bold uppercase tracking-wider">Direct Action: DeepTech Grants</p>
+              <div className="space-y-2">
+                <a 
+                  href="https://www.meitystartuphub.in/quantum" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-2 bg-surface rounded hover:bg-surface-hover transition-colors border border-border/50 text-xs font-semibold text-ink"
+                >
+                  <span>1. DeepTech India Quantum Grant</span>
+                  <span className="text-[10px] font-bold text-moss bg-moss/10 px-2 py-0.5 rounded">₹75 Lakh</span>
+                </a>
+                <a 
+                  href="https://www.investindia.gov.in" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-2 bg-surface rounded hover:bg-surface-hover transition-colors border border-border/50 text-xs font-semibold text-ink"
+                >
+                  <span>2. MeitY SAMRIDH AI Ingest</span>
+                  <span className="text-[10px] font-bold text-moss bg-moss/10 px-2 py-0.5 rounded">₹40 Lakh</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeAiSuggestion === 'DPIIT Seed Funds' && (
+        <div className="bg-gradient-to-br from-amber/10 to-rust/5 p-6 rounded-xl border-2 border-amber/30 shadow-md space-y-4 animate-scaleIn">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🇮🇳</span>
+              <div>
+                <h3 className="text-base font-bold text-ink tracking-tight">DPIIT Seed Fund Compliance Board</h3>
+                <p className="text-[10px] text-muted font-medium uppercase tracking-wider">SISFS & SIDBI Ingestion Pipeline</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setActiveAiSuggestion(null)}
+              className="text-xs text-muted hover:text-ink font-semibold"
+            >
+              ✕ Clear View
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Map list */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-3">
+              <p className="text-[10px] text-muted font-bold uppercase tracking-wider">Interactive State-by-State Funding Pools</p>
+              <div className="space-y-2">
+                {[
+                  { state: 'Elevate Karnataka Startup Grant', amount: '₹20 Lakh', status: 'Applications Open' },
+                  { state: 'T-Hub T-Tribe Accelerator', amount: '₹15 Lakh', status: 'Scaleup Cohort' },
+                  { state: 'Kerala Startup Mission (KSUM)', amount: '₹10 Lakh', status: 'Seed Funding' },
+                ].map(item => (
+                  <div key={item.state} className="flex justify-between items-center p-2 bg-surface rounded border border-border/40 text-xs font-semibold text-ink">
+                    <span>{item.state}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-moss font-bold">{item.amount}</span>
+                      <span className="text-[10px] text-muted font-bold px-2 py-0.5 bg-surface-hover rounded">{item.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Checklist */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-2.5">
+              <p className="text-[10px] text-muted font-bold uppercase tracking-wider">Startup Compliance & Application Steps (Interactive)</p>
+              <div className="space-y-2 text-xs">
+                {[
+                  '1. Acquire DPIIT Startup Recognition Certificate',
+                  '2. Complete Pitch Deck & Financial Valuation Model',
+                  '3. Partner with an Approved Institutional Incubator',
+                  '4. Apply for ₹50 Lakh SISFS Non-dilutive Grant',
+                ].map((step, idx) => (
+                  <label key={step} className="flex items-center gap-2.5 p-2 hover:bg-surface-hover rounded cursor-pointer transition-colors border border-border/20 text-ink font-semibold">
+                    <input 
+                      type="checkbox" 
+                      checked={dpiitSteps[idx]}
+                      onChange={(e) => {
+                        const updated = [...dpiitSteps];
+                        updated[idx] = e.target.checked;
+                        setDpiitSteps(updated);
+                      }}
+                      className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                    />
+                    <span className={dpiitSteps[idx] ? 'line-through text-muted font-normal' : ''}>{step}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeAiSuggestion === 'Equity-free Accelerators' && (
+        <div className="bg-gradient-to-br from-plum/10 to-ocean/5 p-6 rounded-xl border-2 border-plum/30 shadow-md space-y-4 animate-scaleIn">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🚀</span>
+              <div>
+                <h3 className="text-base font-bold text-ink tracking-tight">Accelerator Matchmaking Radar Deck</h3>
+                <p className="text-[10px] text-muted font-medium uppercase tracking-wider">Premium Scaleup Pathways</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setActiveAiSuggestion(null)}
+              className="text-xs text-muted hover:text-ink font-semibold"
+            >
+              ✕ Clear View
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Mentorship Tracker */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-2.5">
+              <p className="text-[10px] text-muted font-bold uppercase tracking-wider">1-on-1 VC & Tech Mentorship Hours</p>
+              <div className="flex justify-between items-center">
+                <span className="text-2xl font-bold text-ink">18.5 Hrs</span>
+                <span className="text-[10px] font-bold text-plum bg-plum/10 px-2.5 py-1 rounded">REMAINING out of 25</span>
+              </div>
+              <div className="h-2 bg-surface-hover rounded-full overflow-hidden border border-border/50">
+                <div className="h-full bg-plum rounded-full" style={{ width: '74%' }} />
+              </div>
+              <p className="text-[10px] text-muted">Direct slots available with Peak XV and Google Cloud India tech leads.</p>
+            </div>
+
+            {/* Accelerator Radar timeline */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-2">
+              <p className="text-[10px] text-muted font-bold uppercase tracking-wider">Active Cohort Application Deadlines</p>
+              <div className="space-y-2 text-xs font-semibold">
+                <div className="flex justify-between items-center p-1.5 bg-surface rounded border border-border/40">
+                  <span className="text-ink">NASSCOM 10K Startups</span>
+                  <span className="text-rust bg-rust/10 px-2 py-0.5 rounded text-[10px]">Closing soon</span>
+                </div>
+                <div className="flex justify-between items-center p-1.5 bg-surface rounded border border-border/40">
+                  <span className="text-ink">Google Cloud AI Accelerator</span>
+                  <span className="text-warning bg-warning/10 px-2 py-0.5 rounded text-[10px]">Applications active</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct Connect Slack */}
+            <div className="p-4 bg-paper rounded-lg border border-border space-y-2 text-center flex flex-col justify-between">
+              <div>
+                <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Direct Connection Slack Integration</p>
+                <p className="text-xs text-ink leading-relaxed font-medium">Link your Slack workspace to matching accelerators for instant team notifications on pitch openings.</p>
+              </div>
+              <button 
+                onClick={() => alert("Connecting Slack integration for Accelerator Radar...")}
+                className="mt-2 w-full py-2 bg-plum text-white rounded text-xs font-bold hover:bg-plum/90 transition-colors shadow-sm"
+              >
+                Connect Slack Channel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Scrolling ticker with real links */}
       <div className="overflow-hidden bg-ink text-paper py-2.5 rounded border-2 border-ink shadow-inner">
         <div className="flex whitespace-nowrap" style={{ transform: `translateX(${tickerOffset}px)` }}>
@@ -300,12 +526,12 @@ export default function Dashboard() {
 
       {/* Main content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Featured Opportunities */}
+        {/* Recent & Scraped Opportunities */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-ink uppercase tracking-wider flex items-center gap-2">
-              <span className="w-6 h-6 bg-amber rounded flex items-center justify-center border border-ink text-[10px]">⭐</span>
-              Featured Opportunities (Direct Links)
+              <span className="w-6 h-6 bg-amber rounded flex items-center justify-center border border-ink text-[10px]">✨</span>
+              Recent & Scraped Opportunities (Direct Links)
             </h2>
             <button onClick={() => setView('opportunities')} className="text-xs text-ocean font-bold hover:underline">
               See all {opportunities.length} opportunities →
@@ -313,7 +539,7 @@ export default function Dashboard() {
           </div>
           
           <div className="space-y-3.5">
-            {featuredOpps.map((opp) => {
+            {recentOpps.map((opp) => {
               const isBookmarked = bookmarkedIds.includes(opp.id);
               const compLogo = getCompanyLogo(opp.organizer);
               return (
@@ -352,7 +578,7 @@ export default function Dashboard() {
                       {/* Direct Original Link display */}
                       <div className="mt-3 pt-3 border-t border-ink/10 flex items-center justify-between flex-wrap gap-2">
                         <a
-                          href={opp.applicationLink}
+                           href={opp.applicationLink}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}

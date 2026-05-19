@@ -2,7 +2,7 @@ import { Opportunity, ScrapingLog, AlertConfig, EmailSubscription } from '../typ
 import { allOpportunities, scrapingLogs, alertConfigs } from '../data/opportunities';
 import { removeDuplicates, fuzzyMatch } from '../utils/helpers';
 
-export type DatabaseEngineType = 'SQLite (Relational)' | 'MongoDB (NoSQL Document)';
+export type DatabaseEngineType = 'SQLite (Relational)' | 'MongoDB (NoSQL Document)' | 'PostgreSQL (Enterprise Pipeline)';
 
 /**
  * Production-Grade Persistent Database Abstraction Engine
@@ -130,8 +130,8 @@ class DatabaseService {
 
   constructor() {
     const savedEngine = localStorage.getItem('STARTUP_DB_ENGINE');
-    if (savedEngine === 'MongoDB (NoSQL Document)') {
-      this.engineType = 'MongoDB (NoSQL Document)';
+    if (savedEngine === 'MongoDB (NoSQL Document)' || savedEngine === 'PostgreSQL (Enterprise Pipeline)') {
+      this.engineType = savedEngine as DatabaseEngineType;
     } else {
       this.engineType = 'SQLite (Relational)';
     }

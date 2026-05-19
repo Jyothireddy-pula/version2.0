@@ -53,25 +53,25 @@
 
 [data-theme="figma"] {
   --app-paper: #000000;
-  --app-surface: #09090b;
-  --app-surface-hover: #18181b;
-  --app-ink: #fafafa;
-  --app-muted: #a1a1aa;
-  --app-border: #27272a;
+  --app-surface: #0a0a0c;
+  --app-surface-hover: #151518;
+  --app-ink: #ffffff;
+  --app-muted: #a0a0a8;
+  --app-border: #1e1e24;
   --app-primary: #ffffff;
-  --app-primary-hover: #e4e4e7;
-  --app-danger: #ef4444;
-  --app-danger-light: #fca5a5;
-  --app-success: #10b981;
-  --app-success-light: #6ee7b7;
-  --app-warning: #f59e0b;
-  --app-warning-light: #fde68a;
-  --app-ocean: #3b82f6;
-  --app-ocean-light: #93c5fd;
-  --app-plum: #8b5cf6;
-  --app-plum-light: #d8b4fe;
-  --app-ghost: #27272a;
-  --app-slate: #fafafa;
+  --app-primary-hover: #e5e5eb;
+  --app-danger: #ff4a4a;
+  --app-danger-light: #ff8585;
+  --app-success: #00e08f;
+  --app-success-light: #52ffbe;
+  --app-warning: #ffaa00;
+  --app-warning-light: #ffd580;
+  --app-ocean: #2f80ed;
+  --app-ocean-light: #8dc2ff;
+  --app-plum: #9b51e0;
+  --app-plum-light: #d4a5ff;
+  --app-ghost: #1e1e24;
+  --app-slate: #ffffff;
 }
 
 @layer base {

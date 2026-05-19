@@ -144,16 +144,16 @@ export const alertConfigs: AlertConfig[] = [
 ];
 
 export const scrapingLogs: ScrapingLog[] = [
-  { id: '1', timestamp: minutesAgo(1), source: 'Startup India Portal', message: 'Scraping completed - found 5 new schemes', level: 'success', itemsFound: 5 },
+  { id: '1', timestamp: minutesAgo(1), source: 'Startup India Portal', message: '[SCRAPE SUCCESS] Scraped & stored: "Startup India Seed Fund Scheme (SISFS)" into database.', level: 'success', itemsFound: 1 },
   { id: '2', timestamp: minutesAgo(3), source: 'NASSCOM 10K Startups', message: 'Processing accelerator listings...', level: 'info' },
   { id: '3', timestamp: minutesAgo(5), source: 'MeitY Portal', message: 'Rate limit detected, backing off 30s', level: 'warn' },
-  { id: '4', timestamp: minutesAgo(8), source: 'SIDBI Portal', message: 'Found 4 new funding schemes', level: 'success', itemsFound: 4 },
+  { id: '4', timestamp: minutesAgo(8), source: 'SIDBI Portal', message: '[SCRAPE SUCCESS] Scraped & stored: "MSME Innovative Scheme" into database.', level: 'success', itemsFound: 1 },
   { id: '5', timestamp: minutesAgo(10), source: 'Google for Startups', message: 'API response received (145KB)', level: 'info' },
   { id: '6', timestamp: minutesAgo(12), source: 'Microsoft for Startups', message: 'Connection timeout - retrying...', level: 'error' },
   { id: '7', timestamp: minutesAgo(15), source: 'IIT/IIM Incubators', message: 'Duplicate detected: "SINE IIT Bombay" - skipping', level: 'warn' },
   { id: '8', timestamp: minutesAgo(18), source: 'Eventbrite API', message: 'Scraper initialized - starting crawl', level: 'info' },
-  { id: '9', timestamp: minutesAgo(20), source: 'Devpost API', message: 'Successfully parsed 38 hackathons', level: 'success', itemsFound: 38 },
-  { id: '10', timestamp: minutesAgo(22), source: 'F6S Global Scraper', message: 'Crawled 32 global programs', level: 'success', itemsFound: 32 },
+  { id: '9', timestamp: minutesAgo(20), source: 'Devpost API', message: '[SCRAPE SUCCESS] Scraped & stored: "AWS Generative AI Hackathon" into database.', level: 'success', itemsFound: 1 },
+  { id: '10', timestamp: minutesAgo(22), source: 'F6S Global Scraper', message: '[SCRAPE SUCCESS] Scraped & stored: "Y Combinator Summer 2026 Batch" into database.', level: 'success', itemsFound: 1 },
 ];
 
 // Helper to generate future deadlines

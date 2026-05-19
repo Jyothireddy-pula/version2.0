@@ -18,9 +18,17 @@ async def run_background_scrape(keyword: str | None = None, region: str | None =
 
 
 @router.post("/run")
-async def run_scrapers(background_tasks: BackgroundTasks, keyword: str | None = None, region: str | None = None):
-    background_tasks.add_task(run_background_scrape, keyword=keyword, region=region)
-    return {"message": "Scraping pipeline initiated successfully in the background", "status": "running"}
+async def run_scrapers(background_tasks: BackgroundTasks, keyword: str | None = None, region: str | None = None, sync: bool = False):
+    if sync:
+        db = SessionLocal()
+        try:
+            results = await scrape_all(db, keyword=keyword, region=region)
+            return {"message": "Scraping pipeline completed successfully", "status": "success", "results": results}
+        finally:
+            db.close()
+    else:
+        background_tasks.add_task(run_background_scrape, keyword=keyword, region=region)
+        return {"message": "Scraping pipeline initiated successfully in the background", "status": "running"}
 
 
 @router.get("/logs")

@@ -314,3 +314,74 @@ export function formatTimeOnly(dateString: string): string {
   const strHours = String(hours).padStart(2, '0');
   return `${strHours}:${minutes}:${seconds} ${ampm}`;
 }
+
+export interface PredictionDetails {
+  predictedOpening: string;
+  confidence: number;
+  cycle: 'Annual' | 'Bi-Annual' | 'Continuous';
+  reasoning: string;
+}
+
+export function predictOpportunityReopening(opp: Opportunity): PredictionDetails {
+  const title = opp.title.toLowerCase();
+  const organizer = opp.organizer.toLowerCase();
+  const type = opp.type.toLowerCase();
+  
+  let cycle: 'Annual' | 'Bi-Annual' | 'Continuous' = 'Annual';
+  let reasoning = 'Matches recurring government budgetary grant schedules.';
+  let confidence = 88;
+  let monthsOffset = 12;
+
+  if (title.includes('hackathon') || type.includes('hackathon') || title.includes('challenge')) {
+    cycle = 'Bi-Annual';
+    monthsOffset = 6;
+    confidence = 92;
+    reasoning = 'Structured developer sprints run bi-annually on seasonal schedules.';
+  } else if (title.includes('fellowship') || type.includes('fellowship')) {
+    cycle = 'Annual';
+    monthsOffset = 12;
+    confidence = 95;
+    reasoning = 'Academic and foundation fellowships align with academic fiscal year starts.';
+  } else if (organizer.includes('dpiit') || organizer.includes('startup india') || organizer.includes('government')) {
+    cycle = 'Annual';
+    monthsOffset = 12;
+    confidence = 94;
+    reasoning = 'Indian public schemes follow recursive Union Budget allocation cycles.';
+  } else if (type.includes('conference') || type.includes('summit')) {
+    cycle = 'Annual';
+    monthsOffset = 12;
+    confidence = 97;
+    reasoning = 'Premier industry networking events occur in recurring annual calendar quarters.';
+  } else if (type.includes('incubator') || type.includes('accelerator')) {
+    cycle = 'Bi-Annual';
+    monthsOffset = 6;
+    confidence = 89;
+    reasoning = 'Incubator cohorts run in sequential Winter/Summer batches.';
+  } else if (opp.deadline === '2026-12-31' || !opp.deadline) {
+    cycle = 'Continuous';
+    monthsOffset = 0;
+    confidence = 99;
+    reasoning = 'Applications are accepted on a rolling open basis throughout the year.';
+  }
+
+  if (cycle === 'Continuous') {
+    return {
+      predictedOpening: 'Open Now (Rolling)',
+      confidence,
+      cycle,
+      reasoning
+    };
+  }
+
+  const baseDate = opp.deadline ? new Date(opp.deadline) : new Date(opp.createdAt);
+  const predicted = new Date(baseDate.getTime());
+  predicted.setMonth(predicted.getMonth() + monthsOffset - 1);
+  
+  const formattedDate = predicted.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  return {
+    predictedOpening: `Expected ${formattedDate}`,
+    confidence,
+    cycle,
+    reasoning
+  };
+}

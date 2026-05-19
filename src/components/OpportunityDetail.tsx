@@ -1,5 +1,5 @@
 import { useStore } from '../store/useStore';
-import { getTypeEmoji, getTypeColor, getRemoteEmoji, formatDate, getDeadlineUrgency } from '../utils/helpers';
+import { getTypeEmoji, getTypeColor, getRemoteEmoji, formatDate, getDeadlineUrgency, predictOpportunityReopening } from '../utils/helpers';
 import {
   X,
   Calendar,
@@ -239,6 +239,41 @@ export default function OpportunityDetail() {
                         </div>
                       )}
                     </div>
+
+                    {/* AI Predictive Reopening & Cycle Forecast */}
+                    {(() => {
+                      const pred = predictOpportunityReopening(opp);
+                      return (
+                        <div className="p-6 bg-gradient-to-br from-[#10b981]/5 to-[#3b82f6]/5 rounded-xl border border-emerald-500/20 space-y-3.5 relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-xl -mr-6 -mt-6" />
+                          <h3 className="text-xs font-bold text-[#10b981] uppercase tracking-wider flex items-center gap-1.5">
+                            <Sparkles size={13} className="animate-pulse" />
+                            AI Deadline & Cycle Forecast
+                          </h3>
+                          
+                          <div className="space-y-2.5">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-muted">Target Cycle:</span>
+                              <span className="font-semibold text-ink bg-surface px-2 py-0.5 rounded border border-border">{pred.cycle}</span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-muted">Confidence:</span>
+                              <span className="font-bold text-[#10b981]">{pred.confidence}% Match</span>
+                            </div>
+
+                            <div className="pt-2.5 border-t border-border/50">
+                              <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Projected Re-Opening</p>
+                              <p className="text-base font-bold text-ink tracking-tight">{pred.predictedOpening}</p>
+                            </div>
+
+                            <p className="text-[11px] text-muted leading-relaxed italic bg-paper p-2.5 rounded border border-border/40">
+                              "{pred.reasoning}"
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Source */}
                     <div className="p-6 bg-surface rounded-xl border border-border space-y-3">

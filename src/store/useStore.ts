@@ -18,6 +18,9 @@ import { removeDuplicates } from '../utils/helpers';
 import { db } from '../services/dbService';
 import { fetchLogsFromApi, fetchOpportunitiesFromApi, isApiConfigured, runScrapersApi } from '../services/apiService';
 
+// File-level ref to track active debounced search timeout
+let searchTimeout: any = null;
+
 interface AppState {
   opportunities: Opportunity[];
   filteredOpportunities: Opportunity[];
@@ -486,7 +489,8 @@ export const useStore = create<AppState>((set, get) => ({
     const state = get();
     if ('search' in newFilters) {
       set({ isSearching: true });
-      setTimeout(() => {
+      if (searchTimeout) clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
         const current = get();
         const updatedFilters = { ...current.filters, ...newFilters };
         const filtered = applyFilters(current.opportunities, updatedFilters);

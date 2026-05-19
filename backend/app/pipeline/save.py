@@ -5,7 +5,12 @@ from app.pipeline.deduplicate import find_duplicate
 
 
 def upsert_opportunity(db: Session, data: dict):
-    duplicate, score = find_duplicate(db, data["normalized_title"], data.get("source_url", ""))
+    duplicate, score = find_duplicate(
+        db, 
+        data["normalized_title"], 
+        data.get("source_url", ""), 
+        data.get("application_link", ""),
+    )
     if duplicate:
         duplicate.description = data.get("description") or duplicate.description
         duplicate.deadline = data.get("deadline") or duplicate.deadline

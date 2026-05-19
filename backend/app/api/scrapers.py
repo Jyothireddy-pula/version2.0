@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
+from app.core.database import get_db, SessionLocal
 from app.models.scrape_log import ScrapeLog
 from app.scrapers.runner import scrape_all
 
@@ -9,9 +9,18 @@ from app.scrapers.runner import scrape_all
 router = APIRouter(prefix="/scrapers", tags=["scrapers"])
 
 
+async def run_background_scrape(keyword: str | None = None, region: str | None = None):
+    db = SessionLocal()
+    try:
+        await scrape_all(db, keyword=keyword, region=region)
+    finally:
+        db.close()
+
+
 @router.post("/run")
-async def run_scrapers(keyword: str | None = None, region: str | None = None, db: Session = Depends(get_db)):
-    return await scrape_all(db, keyword=keyword, region=region)
+async def run_scrapers(background_tasks: BackgroundTasks, keyword: str | None = None, region: str | None = None):
+    background_tasks.add_task(run_background_scrape, keyword=keyword, region=region)
+    return {"message": "Scraping pipeline initiated successfully in the background", "status": "running"}
 
 
 @router.get("/logs")

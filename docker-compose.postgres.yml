@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: startup-opportunities-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: startup_opportunities
+    ports:
+      - "5432:5432"
+    volumes:
+      - startup_opportunities_pg:/var/lib/postgresql/data
+
+volumes:
+  startup_opportunities_pg:
